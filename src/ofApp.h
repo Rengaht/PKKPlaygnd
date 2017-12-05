@@ -10,6 +10,7 @@
 #define ATalkPin 5
 #define BTalkPin 14
 #define ProxPin 21
+#define LoopPin 15
 
 class ofApp : public ofBaseApp{
 

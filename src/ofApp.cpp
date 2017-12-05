@@ -55,6 +55,10 @@ void ofApp::setup(){
 	_sound[ProxPin].play();
 	_sound[ProxPin].setVolume(0);
 
+	//PIPI
+	_sound[LoopPin].setLoop(true);
+
+
 	for(int i=1;i<5;++i){
 		ofSoundPlayer p_;
 		p_.load("sound/synth/1. Captain/captain"+ofToString(i)+".wav");
@@ -138,7 +142,7 @@ void ofApp::updateSerial(){
 			vector<string> val=readSerialString(_serial[i],'#');
 			if(val.size()<2) return;
 
-			ofLog()<<"serial "<<i<<" read: "<<ofToString(val)<<endl;
+			//ofLog()<<"serial "<<i<<" read: "<<ofToString(val)<<endl;
 			
 			int index_=ofToInt(val[1]);
 			//if(index_>=_global->_msound[i]) continue;
@@ -148,26 +152,34 @@ void ofApp::updateSerial(){
 
 			if(val[0]=="T") touchSound(index_);						
 			else if(val[0]=="R") releaseSound(index_);						
-			else if(val[0]=="P") updateProxSound(index_,ofToInt(val[2]));
+			else if(val[0]=="P"){
+				if(val.size()>2) updateProxSound(index_,ofToInt(val[2]));
+			}
 	}
 }
 
 void ofApp::touchSound(int index_){
 
 	if(index_==CaptainPin){
-		_play_captain=ofRandom(_captain.size());
-		_captain[_play_captain].play();
+		if(!_captain[_play_captain].isPlaying()){
+			_play_captain=ofRandom(_captain.size());
+			_captain[_play_captain].play();
+		}
 	}else if(index_==LaserPin){
 		_play_laser=ofRandom(_laser.size());
 		_laser[_play_laser].play();
 	}else if(index_==ATalkPin){
-		_play_atalk=ofRandom(_atalk.size());
-		_atalk[_play_atalk].play();
+		if(!_atalk[_play_atalk].isPlaying()){
+			_play_atalk=ofRandom(_atalk.size());
+			_atalk[_play_atalk].play();
+		}
 	}else if(index_==BTalkPin){
-		_play_btalk=ofRandom(_btalk.size());
-		_btalk[_play_btalk].play();
+		if(!_btalk[_play_btalk].isPlaying()){
+			_play_btalk=ofRandom(_btalk.size());
+			_btalk[_play_btalk].play();
+		}
 	}else{
-		if(index_!=21) _sound[index_].play();	
+		if(index_!=ProxPin) _sound[index_].play();	
 	}
 
 	_status[index_]=1;
@@ -177,13 +189,13 @@ void ofApp::touchSound(int index_){
 
 void ofApp::releaseSound(int index_){
 
-	if(index_==CaptainPin) _captain[_play_captain].stop();
-	else if(index_==LaserPin) _laser[_play_laser].stop();
-	else if(index_==ATalkPin) _atalk[_play_atalk].stop();
-	else if(index_==BTalkPin) _btalk[_play_btalk].stop();
-	else{
-		if(index_!=21) _sound[index_].stop();
-	}
+	//if(index_==CaptainPin) _captain[_play_captain].stop();
+	//else if(index_==LaserPin) _laser[_play_laser].stop();
+	//else if(index_==ATalkPin) _atalk[_play_atalk].stop();
+	//else if(index_==BTalkPin) _btalk[_play_btalk].stop();
+	if(index_<15) _sound[index_].stop();
+	if(index_==15 || index_==16 || index_==17 || index_==22) _sound[index_].stop();
+	
 	_status[index_]=0;
 	ofLog()<<"release "<<index_;
 }
