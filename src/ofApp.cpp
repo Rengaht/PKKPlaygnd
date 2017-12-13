@@ -4,6 +4,8 @@
 void ofApp::setup(){
 	
 	ofSetVerticalSync(true);
+	ofLogToFile("kkplaygnd_"+ofGetTimestampString()+".log",true);
+
 
 	_global=new GlobalParam();
 
@@ -93,8 +95,8 @@ void ofApp::setup(){
 	initSerial();
 
 
+	_itest=0;
 	
-
 
 
 }
@@ -160,6 +162,8 @@ void ofApp::updateSerial(){
 
 void ofApp::touchSound(int index_){
 
+	//if(index_>_sound.size()) return;
+
 	if(index_==CaptainPin){
 		if(!_captain[_play_captain].isPlaying()){
 			_play_captain=ofRandom(_captain.size());
@@ -179,15 +183,21 @@ void ofApp::touchSound(int index_){
 			_btalk[_play_btalk].play();
 		}
 	}else{
-		if(index_!=ProxPin) _sound[index_].play();	
+		if(index_!=ProxPin){
+			_sound[index_].stop();	
+			_sound[index_].play();	
+			_sound[index_].setPosition(0);
+		}
 	}
 
 	_status[index_]=1;
 
-	ofLog()<<"touch "<<index_;
+	ofLog()<<ofGetTimestampString()<<"  --touch "<<index_;
 }
 
 void ofApp::releaseSound(int index_){
+
+	if(index_>_sound.size()) return;
 
 	//if(index_==CaptainPin) _captain[_play_captain].stop();
 	//else if(index_==LaserPin) _laser[_play_laser].stop();
@@ -197,15 +207,21 @@ void ofApp::releaseSound(int index_){
 	if(index_==15 || index_==16 || index_==17 || index_==22) _sound[index_].stop();
 	
 	_status[index_]=0;
-	ofLog()<<"release "<<index_;
+	ofLog()<<ofGetTimestampString()<<"  --release "<<index_;
 }
 
 void ofApp::updateProxSound(int index_,int val_){
+	
+	if(_status[index_]==1){
+		_sound[index_].setVolume(1.0);
+		_sound[index_].setSpeed(1.0);
+		return;
+	}
 	_prox_diff[index_]=val_;
 
 	if(val_>_global->_prox_low_thres){
 		_sound[index_].setVolume(1.0);
-		_sound[index_].setSpeed(ofClamp(ofMap(val_,_global->_prox_low_thres,_global->_prox_high_thres,5,1.0),1.0,5.0));				
+		_sound[index_].setSpeed(ofClamp(ofMap(val_,_global->_prox_low_thres,_global->_prox_high_thres,0.1,1.0),0.1,1.0));				
 	}else{
 		_sound[index_].setVolume(0);
 	}
@@ -228,6 +244,7 @@ void ofApp::draw(){
 	for(int i=0;i<GlobalParam::MPort;++i){
 		
 		ofSetColor(255);
+		ofFill();
 		ofDrawBitmapString(_global->_port[i],0,-r*1.2);
 
 		ofPushMatrix();
@@ -240,6 +257,15 @@ void ofApp::draw(){
 
 			ofDrawCircle(r*j,0,r_);
 
+
+			if(_itest==count_){
+				ofPushStyle();
+					ofSetColor(0,0,255);
+					ofNoFill();
+					ofDrawCircle(r*j,0,r_);
+				ofPopStyle();			
+			}
+
 			count_++;
 			ofTranslate(r*1.2,0);
 		}
@@ -249,6 +275,15 @@ void ofApp::draw(){
 		ofTranslate(0,h);
 	}
 	ofPopMatrix();
+
+	stringstream hint_;
+	hint_<<" 1-4   "<<"check serial port"<<endl
+		 <<" space "<<"toggle bgm"<<endl
+		 <<" t     "<<"test sound"<<endl
+		 <<" r     "<<"move test index"<<endl;
+	ofDrawBitmapString(hint_.str(),20,ofGetHeight()-80);
+
+
 }
 
 //--------------------------------------------------------------
@@ -263,7 +298,17 @@ void ofApp::keyPressed(int key){
 		case ' ':
 			toggleBgm();
 			break;
-		
+		case 't':
+			//sound test
+			ofLog()<<"sound test!";			
+			if(_status[_itest]==1) releaseSound(_itest);
+			else touchSound(_itest);
+			_itest=(_itest+1)%_msound;
+			break;
+		case 'r':
+			//sound test
+			_itest=(_itest+1)%_msound;
+			break;
 	}
 }
 

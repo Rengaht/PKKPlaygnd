@@ -53,3 +53,4 @@ Temporary Items
 
 /obj
 *.opendb
+*.log

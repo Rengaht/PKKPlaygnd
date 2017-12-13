@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+//#include "ofxMaim.h"
 #include "StringUtil.h"
 #include "Parameter.h"
 
@@ -39,6 +40,7 @@ class ofApp : public ofBaseApp{
 
 		ofSoundPlayer _bgm;
 		int _msound;
+		int _itest;
 
 		vector<ofSoundPlayer>  _captain;
 		vector<ofSoundPlayer>  _laser;
